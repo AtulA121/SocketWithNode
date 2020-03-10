@@ -1,23 +1,21 @@
-let jwt=require('jsonwebtoken');
 let constants=require("../service/constants");
+let service=require("../service/service");
 
 let conn={
     verifyToken : async(req,res,next)=>{
         let token=req.headers[constants.authtoken];
         if(token){
-            jwt.verify(token, constants.jwtKey, (err, verifiedJwt) => {
-                if(err){
-                    conn.verifyFailed(req,res,next);
-                }else{
-                    req.body.userId=verifiedJwt.userId;
-                    next();
-                }
+            service.verifyToken(token).then(res=>{
+                req.body.userId=res;
+                next();
+            }).catch(err=>{
+                conn.verifyFailed(res);
             });
         }else{
-            conn.verifyFailed(req,res,next);
+            conn.verifyFailed(res);
         }
     },
-    verifyFailed : (req,res,next)=>{
+    verifyFailed : (res)=>{
         res.send({
             result : false
         });

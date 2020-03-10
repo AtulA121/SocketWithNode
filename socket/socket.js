@@ -1,6 +1,5 @@
-let jwt=require('jsonwebtoken');
 let socketIO = require('socket.io');
-let constants=require("../service/constants");
+let service=require("../service/service");
 
 let users={};
 let sock;
@@ -20,10 +19,10 @@ let conn={
         socket.emit("open","connected to server : ");
     },
     onClose : (socket)=>{
-        socket.on("disconnect",(data)=>{
+        socket.on("disconnect",async(data)=>{
             let token=socket.handshake.query.token;
-            jwt.verify(token, constants.jwtKey, (err, verifiedJwt) => {
-                conn.removeUser(verifiedJwt.userId);
+            await service.verifyToken(token).then(res=>{
+                conn.removeUser(res);
             });
         });
     },
@@ -40,8 +39,8 @@ let conn={
     },
     addUser : async(socket)=>{
         let token=socket.handshake.query.token;
-        jwt.verify(token, constants.jwtKey, (err, verifiedJwt) => {
-            users[verifiedJwt.userId]=socket;
+        await service.verifyToken(token).then(res=>{
+            users[res]=socket;
         });
     },
     removeUser : (userId)=>{
