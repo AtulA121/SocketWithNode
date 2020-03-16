@@ -8,9 +8,8 @@ let conn={
             jwt.verify(token, constants.jwtKey, async(err, verifiedJwt) => {
                 if(err){
                     reject(err);
-                }else{
-                    resolve(verifiedJwt.userId);
                 }
+                resolve(verifiedJwt.userId);
             });
         });
     }
