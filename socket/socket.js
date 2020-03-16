@@ -32,8 +32,7 @@ let secureConn={
     },
     onClose : (socket)=>{
         socket.on("disconnect",async(data)=>{
-            let token=socket.handshake.query.token;
-            await service.verifyToken(token).then(res=>{
+            await service.verifyToken(socket).then(res=>{
                 conn.removeUser(res);
             });
         });
@@ -44,8 +43,7 @@ let secureConn={
         });
     },
     addUser : async(socket)=>{
-        let token=socket.handshake.query.token;
-        await service.verifyToken(token).then(res=>{
+        await service.verifyToken(socket).then(res=>{
             users[res]=socket;
         });
     }
