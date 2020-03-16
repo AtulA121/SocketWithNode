@@ -9,12 +9,24 @@ let conn={
         let io = socketIO(server);
         io.of("/event").on('connection', async(socket) => {
             sock=socket;
-            await conn.addUser(socket);
-            conn.onOpen(socket);
-            conn.onClose(socket);
-            conn.onMessage(socket);
+            await secureConn.addUser(socket);
+            secureConn.onOpen(socket);
+            secureConn.onClose(socket);
+            secureConn.onMessage(socket);
         });
     },
+    sendMessage : (userId,obj)=>{
+        users[userId].emit("message",JSON.stringify(obj));
+    },
+    getSocketInstance : ()=>{
+        return sock;
+    },
+    removeUser : (userId)=>{
+        delete users[userId];
+    }
+}
+
+let secureConn={
     onOpen : (socket)=>{
         socket.emit("open","connected to server : ");
     },
@@ -31,20 +43,11 @@ let conn={
             console.log("onMessage : ",JSON.parse(data));
         });
     },
-    sendMessage : (userId,obj)=>{
-        users[userId].emit("message",JSON.stringify(obj));
-    },
-    getSocketInstance : ()=>{
-        return sock;
-    },
     addUser : async(socket)=>{
         let token=socket.handshake.query.token;
         await service.verifyToken(token).then(res=>{
             users[res]=socket;
         });
-    },
-    removeUser : (userId)=>{
-        delete users[userId];
     }
 }
 
